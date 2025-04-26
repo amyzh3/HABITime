@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Choices from "./Choices";
 import "./Preferences.css";
+import {useNavigate} from "react-router-dom";
 
 const concerns = [
     "Depression", "Anxiety", "Chronic-fatigue", "Bad-posture", "Back-pain", "Constipation",
@@ -11,33 +12,36 @@ const habits = [
     "Journaling", "Healthy-eating", "Regular-exercise", "Limited-screen-time", "Reading", "Sleep-eight-hours"
 ];
 
-function Preferences(nickname, age) {
+function Preferences({ nickname, age }) {
     const [formData, setFormData] = useState({ concerns: [], habits: [] });
-    const user = parseInt(localStorage.getItem("uid"), 10);
+    const user = localStorage.getItem("uid");
 
-    const handleSubmitPreferences = () => {
-        console.log(formData);
-        // console.log(localStorage.getItem("uid"));
-        // console.log(user);
-        // fetch("http://localhost:8080/project/api/preferences/update", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     },
-        //     body: JSON.stringify({
-        //         concerns: formData.concerns,
-        //         habits: formData.habits,
-        //         userId: user
-        //     })
-        // })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         console.log("Preferences updated:", data);
-        //         window.location.href = "/dashboard";
-        //     })
-        //     .catch(error => {
-        //         console.error("Error updating preferences:", error);
-        //     });
+    const navigate = useNavigate();
+
+    const handleSubmitPreferences = async (e) => {
+        console.log(nickname)
+        console.log(age)
+        console.log(formData)
+        const userData = {
+            nickname,
+            age,
+            concerns,
+            habits
+        };
+        try {
+            const response = await fetch('/createuser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            });
+            const data = await response.json();
+            console.log('User created successfully:', data);
+            navigate("/cal");
+        } catch (error) {
+            console.error("Error creating user:", error);
+        }
     };
 
     const handleUpdateData = (updatedData) => {

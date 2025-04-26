@@ -24,7 +24,9 @@ export default function Signup() {
             nickname,
             age
         });
-        navigate("/selection");
+        navigate("/selection", {
+            state: { nickname, age },
+        });
     };
 
     return (
