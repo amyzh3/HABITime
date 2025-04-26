@@ -77,24 +77,32 @@ async function getCalendarEvents(userId) {
 }
 // add a user to the database: auth (string), age (int), nickname (string)
 // targetConcerns (list of strings), improveAreas (list of strings)
-app.post('/adduser', async (req, res) => {
+app.post('/createuser', async (req, res) => {
   try {
-    const { code, age, nickname, targetConcerns, improveAreas } = req.body;
+    const { code, nickname, age, concerns, habits } = req.body;
+    console.log(code);
+    console.log(nickname);
+    console.log(age);
+    console.log(concerns);
+    console.log(habits);
 
     // Exchange authorization code for access + refresh tokens
     const { tokens } = await oAuth2Client.getToken(code);
 
     // Create user document first
     const docRef = await db.collection('users').add({
+      code,
       age,
       nickname,
-      targetConcerns,
-      improveAreas,
+      concerns,
+      habits,
       createdAt: new Date()
     });
 
     // Save user's tokens under their user document
+    console.log('saving user tokens');
     await saveUserTokens(docRef.id, tokens);
+    console.log('done saving user tokens');
 
     console.log('Added a new user and stored tokens.');
     res.status(201).send({ message: 'User data and tokens saved', id: docRef.id });

@@ -1,18 +1,19 @@
 import { useState } from "react";
 import Choices from "./Choices";
 import "./Preferences.css";
+import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
-const concerns = [
+const fullconcerns = [
     "Depression", "Anxiety", "Chronic-fatigue", "Bad-posture", "Back-pain", "Constipation",
     "Vitamin-D-deficiency"
 ];
 
-const habits = [
+const fullhabits = [
     "Journaling", "Healthy-eating", "Regular-exercise", "Limited-screen-time", "Reading", "Sleep-eight-hours"
 ];
 
-function Preferences({ nickname, age }) {
+function Preferences({ nickname, age}) {
     const [formData, setFormData] = useState({ concerns: [], habits: [] });
     const user = localStorage.getItem("uid");
 
@@ -23,21 +24,20 @@ function Preferences({ nickname, age }) {
         console.log(age)
         console.log(formData)
         const userData = {
+            code: localStorage.getItem("googleAuthCode"),
             nickname,
             age,
-            concerns,
-            habits
+            concerns: formData.concerns,
+            habits: formData.habits
         };
         try {
-            const response = await fetch('/createuser', {
-                method: 'POST',
+            const response = await axios.post('http://localhost:8080/createuser', userData, {
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData),
+                }
             });
-            const data = await response.json();
-            console.log('User created successfully:', data);
+    
+            console.log('User created successfully:', response.data);
             navigate("/cal");
         } catch (error) {
             console.error("Error creating user:", error);
@@ -53,7 +53,7 @@ function Preferences({ nickname, age }) {
             <form className="choices-container">
                 <label>Select up to 3 concerns you want to target</label>
                 <div className="concerns-selection">
-                    {concerns.map((category, ind) => (
+                    {fullconcerns.map((category, ind) => (
                         <div className="preference-choices" key={ind}>
                             <Choices
                                 filterName={category}
@@ -66,7 +66,7 @@ function Preferences({ nickname, age }) {
                 </div>
                 <label>Select up to 3 habits you want to build</label>
                 <div className="habits-selection">
-                    {habits.map((category, ind) => (
+                    {fullhabits.map((category, ind) => (
                         <div className="preference-choices" key={ind}>
                             <Choices
                                 filterName={category}

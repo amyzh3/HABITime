@@ -37,7 +37,6 @@ export default function Login() {
                     console.log('Authorization code:', response.code);
                     localStorage.setItem('googleAuthCode', response.code);
                     setAuthCode(response.code);
-                    // TODO: send this response.code to your backend to exchange for access/refresh tokens
                 }
             });
             client.requestCode();
