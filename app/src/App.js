@@ -1,7 +1,10 @@
-import logo from './logo.svg';
 import axios from 'axios';
+import React from 'react';
+import Login from './pages/Login';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import './App.css';
+
 const apiCall = () => {
   axios.get('http://localhost:8080').then((data) => {
     //this console.log will be in our frontend console
@@ -10,27 +13,16 @@ const apiCall = () => {
 }
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-
-        <button onClick={apiCall}>Make API Call</button>
-
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <Router>
+            <div>
+                <Routes>
+                    <Route path="/" element={<Login />} />
+                    <Route path="/login" element={<Login />} />
+                </Routes>
+            </div>
+        </Router>
+    );
 }
 
 export default App;

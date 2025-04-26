@@ -1,0 +1,73 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f1f0ef;
+}
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.left {
+    text-align: left;
+    color: #53413E;
+}
+
+.title {
+    font-size: 44px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 80px;
+    font-family: "Lovers Quarrel", cursive;
+    margin: 0 0 0 50px;
+}
+
+.description {
+    margin: 60px 0 0 30px;
+    font-size: 16px;
+}
+
+.right {
+    display: flex;
+    flex-direction: column;
+    margin-left: 64px;
+    gap: 16px;
+}
+
+.login-button {
+    width: 300px;
+    padding: 12px;
+    border: 2px solid #9A8885;
+    color: #53413E;
+    background-color: transparent;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.signup-button {
+    width: 300px;
+    padding: 12px;
+    background-color: #9A8885;
+    color: #F5F5F5;
+    font-weight: bold;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.login-button:hover {
+    background-color: #e8e5e3;
+}
+
+.signup-button:hover {
+    background-color: #725752;
+}
