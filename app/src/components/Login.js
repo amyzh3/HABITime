@@ -12,6 +12,20 @@ export default function Login() {
           const result = await signInWithPopup(auth, provider);
           setUser(result.user);
           console.log("Logged in:", result.user);
+
+
+          const client = window.google.accounts.oauth2.initCodeClient({
+            client_id: 'Google client id', // Google Cloud OAuth Client ID
+            scope: 'https://www.googleapis.com/auth/calendar.readonly',
+            access_type: 'offline',
+            ux_mode: 'popup',
+            callback: async (response) => {
+              console.log('Authorization code:', response.code);
+              // TODO: send this response.code to your backend to exchange for access/refresh tokens
+            }
+          });
+      
+          client.requestCode();
         } catch (error) {
           console.error("Login failed:", error);
         }
