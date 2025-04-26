@@ -1,0 +1,16 @@
+
+.rbc-header {
+  padding: 30px;
+}
+
+.rbc-label {
+  font-size: 12px;
+}
+.rbc-time-header-cell .rbc-today {
+  background-color: darkgray;
+}
+
+.calendar-border {
+  border: 1px solid red;
+}
+
