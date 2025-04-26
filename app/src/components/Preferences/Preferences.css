@@ -1,0 +1,42 @@
+.center-block {
+    display: flex;
+    flex-direction: column;
+    max-height: 50vh;
+    text-align: center;
+    align-items: center;
+}
+
+.choices-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.concerns-selection, .habits-selection {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 3em;
+}
+
+.preference-choices {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 18rem;
+}
+
+button#submit-choices {
+    background-color: #9A8885;
+    color: #FFFDF1;
+    font-size: 16px;
+    border: 1px solid #9A8885;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+button#submit-choices:hover {
+    background-color: #B2A3A0;
+}

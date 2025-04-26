@@ -4,14 +4,14 @@ body {
     background-color: #f1f0ef;
 }
 
-.container {
+.login-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.left {
+.login-left {
     text-align: left;
     color: #53413E;
 }
@@ -33,7 +33,7 @@ body {
     font-size: 16px;
 }
 
-.right {
+.login-right {
     display: flex;
     flex-direction: column;
     margin-left: 64px;

@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React from 'react';
-import Login from './pages/Login';
+import Login from './components/Login';
+import Signup from './components/Signup'
+import Selection from './components/Selection'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import './App.css';
@@ -22,6 +24,8 @@ function App() {
                     <Route path="/" element={<Login />} />
                     <Route path="/login" element={<Login />} />
                     <Route path='/cal' element={<MyCalendar />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/selection" element={<Selection />} />
                 </Routes>
             </div>
         </Router>

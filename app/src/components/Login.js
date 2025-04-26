@@ -18,8 +18,8 @@ export default function Login() {
     };
 
     return (
-        <div className="container">
-            <div className="left">
+        <div className="login-container">
+            <div className="login-left">
                 <h1 className="title">Live healthier,</h1>
                 <p className="subtitle">one day at a time.</p>
                 <p className="description">
@@ -27,8 +27,7 @@ export default function Login() {
                     with your Google account.
                 </p>
             </div>
-
-            <div className="right">
+            <div className="login-right">
                 <button onClick={handleLogin} className="login-button">Log in with Google</button>
                 <button onClick={handleLogin} className="signup-button">Sign up with Google</button>
             </div>
