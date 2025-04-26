@@ -30,7 +30,7 @@ export default function Login() {
 
             <div className="right">
                 <button onClick={handleLogin} className="login-button">Log in with Google</button>
-                <button className="signup-button">Sign up with Google</button>
+                <button onClick={handleLogin} className="signup-button">Sign up with Google</button>
             </div>
         </div>
     );
