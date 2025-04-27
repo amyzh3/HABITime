@@ -128,8 +128,42 @@ export default function Dashboard() {
         }));
 
         // Fetch mood data
-        setMoodData(userData.moodData);
+        const sortedMoodData = Object.fromEntries(
+          Object.entries(userData.moodData)
+            .sort(([a], [b]) => {
+              const getStartDate = (range) => {
+                const [start] = range.split("-");
+                const [month, day] = start.split("/").map(Number);
+                return new Date(2024, month - 1, day); // adjust year if needed
+              };
+              return getStartDate(a) - getStartDate(b);
+            })
+        );
+        setMoodData(sortedMoodData);
         console.log("Mood data fetched successfully:", userData.moodData);
+        if (userData.moodData) {
+          const today = new Date();
+          const month = today.getMonth() + 1; // JS months are 0-based
+          const day = today.getDate();
+        
+          for (const [weekRange, moods] of Object.entries(userData.moodData)) {
+            const [startStr, endStr] = weekRange.split("-");
+            const [startMonth, startDay] = startStr.split("/").map(Number);
+            const startDate = new Date(today.getFullYear(), startMonth - 1, startDay);
+            const endDate = new Date(today.getFullYear(), startMonth - 1, startDay + 6); // 7 days
+        
+            if (today >= startDate && today <= endDate) {
+              const dayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)); // how many days since start
+              const moodToday = moods[dayIndex];
+        
+              const moodIdx = cycleMoods.indexOf(moodToday || ""); // find in ["", "1", "2", "3", "4", "5"]
+              if (moodIdx !== -1) {
+                setTodayMoodIndex(moodIdx);
+              }
+              break;
+            }
+          }
+        }
 
         console.log(formattedEvents);
         setEvents(formattedEvents);
@@ -214,21 +248,25 @@ export default function Dashboard() {
                               console.log('uid', uid);
 
                               let newMood;
-                              if(todayMoodIndex === 0){
+                              if(todayMoodIndex === "0"){
                                 newMood = "";
                               }else{
-                                newMood = String(todayMoodIndex);
+                                newMood = String(todayMoodIndex + 1);
                               }
 
                               console.log('newMood', newMood);
                           
                               try {
-                                await axios.post('http://localhost:8080/log-mood', {
+                                const response = await axios.post('http://localhost:8080/log-mood', {
                                   uid: uid,
                                   mood: newMood,
                                 },  
                               );
-                                console.log('Mood logged successfully:', newMood);
+                                if(response.status == 200) {
+                                  console.log('Mood logged successfully: ', newMood);
+                                } else {
+                                  console.log('Error logging mood: ', newMood);
+                                }
                               } catch (error) {
                                 console.error('Error logging mood:', error);
                               }
