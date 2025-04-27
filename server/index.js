@@ -99,7 +99,7 @@ async function getGeminiRecs(events, concerns, habits) {
 
   try {
     const result = await genAI.models.generateContent({
-        model: "gemini-2.5-pro-exp-03-25",
+        model: "gemini-2.0-flash",
         contents: [
             {
                 parts: [{ text: prompt }],
@@ -107,9 +107,19 @@ async function getGeminiRecs(events, concerns, habits) {
         ],
     });
 
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
+    let text = result.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
     console.log(text);
-    return text == "No response" ? [] : JSON.parse(text);
+
+    if(text == "No response") return [];
+
+    const jsonBlockMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+    
+    if (jsonBlockMatch) {
+      text = jsonBlockMatch[1]; // extract the inside of the ```json ``` block
+    }
+    console.log(text);
+    return JSON.parse(text);
+
 
   } catch (error) {
       console.error(error);
@@ -250,9 +260,9 @@ app.post('/createuser', async (req, res) => {
 
     console.log('Events: ', calEvents);
 
-    const geminiEvents = await getGeminiRecs(calEvents, concerns, habits);
+    const recommendations = await getGeminiRecs(calEvents, concerns, habits);
 
-    console.log("Gemini: ", geminiEvents);
+    console.log("Gemini: ", recommendations);
 
     // Create user document first
     const docRef = await db.collection('users').add({
@@ -263,6 +273,7 @@ app.post('/createuser', async (req, res) => {
       calEvents,
       concerns,
       habits,
+      recommendations,
       createdAt: new Date()
     });
 
@@ -274,11 +285,6 @@ app.post('/createuser', async (req, res) => {
     console.log('Added a new user and stored tokens.');
     res.status(201).send({ message: 'User data and tokens saved', id: docRef.id });
 
-    // TODO: connect with google calendar api
-    // store user's events inside the default calendar
-    // given the events, target concerns and improvement areas,
-    // generate a list of recommendations. 
-    // store recommendations under each 
 
   } catch (error) {
     console.error('Error adding user data:', error);
@@ -286,8 +292,6 @@ app.post('/createuser', async (req, res) => {
   }
 });
 
-// get, store, return calendar updates
-// given calendar updates, generate, store, return new recommendations
 
 
 // given auth, modifies list of new target concerns + improvement areas
@@ -305,18 +309,18 @@ app.post('/modify-concerns', async (req, res) => {
     }
     const doc = querySnapshot.docs[0];
     const userRef = db.collection('users').doc(doc.id);
-    // TODO: generate new recommendations based on the new concerns/areas
-    // ex: 
-    // const newRecommendations = generateRecommendations(targetConcerns, improvementAres);
-
-    // update the user's targetConcerns and improvementAreas
+    const events = doc.data().calEvents;
+    const newRecommendations = await getGeminiRecs(events, newConcerns, newHabits);
+    console.log('new recommendations', newRecommendations);
+    // update the user data
     await userRef.update({
       concerns: newConcerns,
       habits: newHabits,
+      recommendations: newRecommendations,
       updatedAt: new Date()
     });
 
-    console.log("processing concern modification");
+    console.log("processed concern modification!");
 
     res.status(200).send({ message: 'User concerns and improvement areas updated!' });
   } catch (error) {
@@ -360,16 +364,15 @@ app.post('/update-cal', async (req, res) => {
   }
   const doc = querySnapshot.docs[0];
   const userRef = db.collection('users').doc(doc.id);
+  const targetConcerns = doc.data().concerns;
+  const improvementAreas = doc.data().habits;
 
+  const newRecommendations = await getGeminiRecs(events, targetConcerns, improvementAreas);
+  console.log('new recommendations', newRecommendations);
 
-    // TODO: generate new recommendations given the new events
-    // ex: 
-    // const newTargetConcerns = generateRecommendations(targetConcerns);
-    // const newImprovementAreas = generateRecommendations(improvementAreas)
-
-    // TODO: update the user's concerns and habits as well
     await userRef.update({
       calEvents: events,
+      recommendations: newRecommendations,
       updatedAt: new Date()
     });
     console.log('calendar events updated');
