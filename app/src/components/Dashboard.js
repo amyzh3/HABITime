@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [month, setMonth] = useState("");
   const [moodData, setMoodData] = useState(null); // user's mood data to render
   const [todayMoodIndex, setTodayMoodIndex] = useState(0); // what mood we feel today
+  const [profileImgUrl, setprofileImgUrl] = useState(localStorage.getItem('profile-imgURL'));
 
   const [dataReady, setDataReady] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
@@ -302,7 +303,7 @@ export default function Dashboard() {
           </button>
           <img
             className="pfp-img"
-            src={localStorage.getItem("profile-imgURL") || minion}
+            src={(console.log('ProfileImgUrl:', profileImgUrl), profileImgUrl || minion)}
             alt="profile picture"
           />
         </div>
