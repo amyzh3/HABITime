@@ -268,6 +268,29 @@ app.get('/calendar/events', async (req, res) => {
   }
 });
 
+// get user info
+app.get('/userinfo', async (req, res) => {
+  try {
+    const { uid } = req.query;
+    // const uid = "L5lRkUqonQXQZXLuCFjAOEk7mJg2"; // for testing
+    const usersRef = db.collection('users');
+    const querySnapshot = await usersRef.where('uid', '==', uid).get();
+
+    if (!querySnapshot.empty) { // user exists
+      const userData = querySnapshot.docs[0].data();
+      console.log('User data:', userData);
+      const { tokens, ...userDataWithoutTokens } = userData;
+      return res.status(200).send({ message: 'User found', data: userDataWithoutTokens });
+    } else {
+      console.log('User not found.');
+      return res.status(404).send({ message: 'User not found' });
+    }
+  } catch (e) {
+    console.error('Error fetching user info:', e);
+    res.status(500).send({ error: 'Internal server error' });
+  }
+});
+
 
 // export db if needed in other files
 module.exports = { db };
