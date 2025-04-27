@@ -52,24 +52,54 @@ async function loadTokensFromFirestore(userId) {
   return doc.exists ? doc.data().tokens : null;
 }
 
-async function getCalendarEvents(userId) {
-  const tokens = await loadTokensFromFirestore(userId);
+// async function getCalendarEvents(userId) {
+//   const tokens = await loadTokensFromFirestore(userId);
+//   if (!tokens) throw new Error('No tokens found for user');
+
+//   const oauth2Client = new google.auth.OAuth2();
+//   oauth2Client.setCredentials(tokens);
+
+//   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+//   const response = await calendar.events.list({
+//     calendarId: 'primary',
+//     timeMin: new Date().toISOString(),
+//     maxResults: 20,
+//     singleEvents: true,
+//     orderBy: 'startTime',
+//   });
+
+//   return response.data.items || [];
+// }
+
+async function getCalendarEvents(tokens) {
+  // const tokens = await loadTokensFromFirestore(userId);
   if (!tokens) throw new Error('No tokens found for user');
 
+  console.log("In calendar events");
+
   const oauth2Client = new google.auth.OAuth2();
+
   oauth2Client.setCredentials(tokens);
 
   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-  const response = await calendar.events.list({
-    calendarId: 'primary',
-    timeMin: new Date().toISOString(),
-    maxResults: 20,
-    singleEvents: true,
-    orderBy: 'startTime',
-  });
 
-  return response.data.items || [];
+  console.log(calendar.calendarList);
+
+  try {
+    const response = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: new Date().toISOString(),
+      maxResults: 20,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+    return response.data.items || [];
+  } catch (error) {
+    console.error('Error fetching calendar events:', error);
+    throw error;
+  }
 }
+
 // add a user to the database: auth (string), age (int), nickname (string)
 // targetConcerns (list of strings), improveAreas (list of strings)
 app.post('/createuser', async (req, res) => {
@@ -92,7 +122,11 @@ app.post('/createuser', async (req, res) => {
     );
 
     const { tokens } = await oAuth2Client.getToken(code);
-    console.log('OBTAINED TOKENS');
+    console.log('OBTAINED TOKENS', tokens);
+
+    const events = await getCalendarEvents(tokens);
+
+    console.log('Events: ', events);
 
     // Create user document first
     const docRef = await db.collection('users').add({
