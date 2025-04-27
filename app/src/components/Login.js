@@ -42,7 +42,7 @@ export default function Login() {
             const result = await signInWithPopup(auth, provider);
             setUser(result.user);
             console.log("Signed up:", result.user);
-            localStorage.setItem("googleAuthCode", result)
+            // localStorage.setItem("googleAuthCode", result)
             localStorage.setItem("uid", result.user.uid);
             try {    
                 const newUserRes = await axios.get('http://localhost:8080/existing-user', {
