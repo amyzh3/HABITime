@@ -4,6 +4,8 @@ import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import '../styles/login.css';
+import { ImGoogle3 } from "react-icons/im";
+
 
 export default function Login() {
     const [user, setUser] = useState(null);
@@ -115,8 +117,8 @@ export default function Login() {
                 </p>
             </div>
             <div className="login-right">
-                <button onClick={handleLogin} className="login-button">Log in with Google</button>
-                <button onClick={handleSignup} className="signup-button">Sign up with Google</button>
+                <button onClick={handleLogin} className="login-button" style={{display: "flex", justifyContent: "center"}}><div style={{display: "flex", alignItems: "center", gap: "10px"}}><ImGoogle3/> Log in with Google</div></button>
+                <button onClick={handleSignup} className="signup-button" style={{display: "flex", justifyContent: "center"}}>Sign up with Google</button>
             </div>
         </div>
     );
