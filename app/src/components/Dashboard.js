@@ -7,7 +7,8 @@ import { BiSolidEdit } from "react-icons/bi";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { TbCircleDotted } from "react-icons/tb";
+import { TbMoodHappy, TbMoodSmile, TbMoodNeutral, TbMoodSad, TbMoodCry } from "react-icons/tb";
 
 export default function Dashboard() {
   const [resyncClicked, setResyncClicked] = useState(false); // for jiggle animation
@@ -17,10 +18,22 @@ export default function Dashboard() {
   const [concerns, setConcerns] = useState([]); // for user concerns
   const [habits, setHabits] = useState([]); // for user habits
   const [month, setMonth] = useState("");
+  const [moodData, setMoodData] = useState(null); // user's mood data to render
+  const [todayMoodIndex, setTodayMoodIndex] = useState(0); // what mood we feel today
 
   const [dataReady, setDataReady] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
 
   const navigate = useNavigate();
+
+  const moodIconMap = {
+    "1": <TbMoodHappy size={38} />,   // very happy
+    "2": <TbMoodSmile size={38} />,   // happy
+    "3": <TbMoodNeutral size={38} />, // neutral
+    "4": <TbMoodSad size={38} />,     // sad
+    "5": <TbMoodCry size={38} />,     // very sad
+    "": <TbCircleDotted size={38} />  // blank (no entry)
+  };
 
   const handleResyncClick = async () => {
     setResyncClicked(true);
@@ -44,7 +57,25 @@ export default function Dashboard() {
   const handleJournalClick = () => {
     setJournalClicked(true);
     setTimeout(() => setJournalClicked(false), 500);
+    setShowOverlay(true);
   };
+
+  // const userMoodData = [
+  //   {
+  //     "4/6-4/12": ["1", "2", "1", "4", "5", "1", "3"]
+  //   },
+  //   {
+  //     "4/13-4/19" : ["2", "1", "4", "2", "4", "3", "1"]
+  //   },
+  //   {
+  //     "4/20-4/26" : ["5", "5", "5", "5", "5", "1", "4"]
+  //   },
+  //   {
+  //     "4/27-5/3" : ["", "", "", "", "", "", ""]
+  //   }
+  // ]
+
+  const cycleMoods = ["", "1", "2", "3", "4", "5"];
 
   const handleEditClick = () => {
     setEditClicked(true);
@@ -82,8 +113,10 @@ export default function Dashboard() {
         params: { uid }, // Pass the UID as a query parameter
       });
 
+
       if (response.data && response.data.data) {
         const userData = response.data.data;
+        console.log("User data fetched successfully:", userData);
 
         const formattedEvents = [...userData.calEvents, ...userData.recommendations].map(event => ({
           ...event,
@@ -93,6 +126,10 @@ export default function Dashboard() {
           allDay: event.allDay || false,
           title: event.title || "Untitled Event"
         }));
+
+        // Fetch mood data
+        setMoodData(userData.moodData);
+        console.log("Mood data fetched successfully:", userData.moodData);
 
         console.log(formattedEvents);
         setEvents(formattedEvents);
@@ -126,8 +163,89 @@ export default function Dashboard() {
     console.log("events updated:", events);
   }, [events]);
 
+  
+
   return (
     <div className="dashboard-container">
+      {showOverlay && (
+        <div className="overlay-background" onClick={() => setShowOverlay(false)}>
+        <div className="overlay-content" onClick={(e) => e.stopPropagation()}>
+          <h2 style={{color: "#53413E"}}>At a glance...</h2>      
+          <div className="week-summary">
+            {moodData ? (
+              Object.entries(moodData).map(([week, emojis], index) => {
+                const today = new Date();
+                const thisMonth = today.getMonth(); // 0=January, 3=April, etc
+                if(emojis.length < 7){
+                  emojis = [...emojis, ...Array(7 - emojis.length).fill("")];
+                }
+
+                const [startStr, endStr] = week.split("-");
+                const [startMonth, startDay] = startStr.split("/").map(Number);
+                const startDate = new Date(today.getFullYear(), startMonth - 1, startDay);
+                const endDate = new Date(today.getFullYear(), startMonth - 1, startDay + 6); // 7 days later
+              
+                const isThisWeek = today >= startDate && today <= endDate;
+                const isThisMonth = startDate.getMonth() === thisMonth;
+                const todayIndex = (isThisWeek && isThisMonth) ? Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) : -1;
+              
+                return (
+                  <div key={index}>
+                    <p style={{color: "#53413E"}}>{week}</p>
+                    <div className="emoji-row">
+                      {emojis.map((emoji, idx) => (
+                        <span
+                          key={idx}
+                          className={idx === todayIndex ? "today-emoji" : ""}
+                          style={{
+                            color: idx === todayIndex ? "#83935C" : "#53413E",
+                            cursor: idx === todayIndex ? "pointer" : "default",
+                          }}
+                          onClick={async() => {
+                            if (idx === todayIndex) {
+                              setTodayMoodIndex((prev) => (prev + 1) % cycleMoods.length);
+
+                              const uid = localStorage.getItem('uid');
+                              console.log('uid', uid);
+
+                              let newMood;
+                              if(todayMoodIndex === 0){
+                                newMood = "";
+                              }else{
+                                newMood = String(todayMoodIndex);
+                              }
+
+                              console.log('newMood', newMood);
+                          
+                              try {
+                                await axios.post('http://localhost:8080/log-mood', {
+                                  uid: uid,
+                                  mood: newMood,
+                                },  
+                              );
+                                console.log('Mood logged successfully:', newMood);
+                              } catch (error) {
+                                console.error('Error logging mood:', error);
+                              }
+                            }
+                          }}
+                        >
+                          {idx === todayIndex
+                            ? (moodIconMap[cycleMoods[todayMoodIndex]] || <TbCircleDotted size={38} />)
+                            : (moodIconMap[emoji] || <TbCircleDotted size={38} />)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div>Loading moods...</div>
+            )}
+          </div>  
+        </div>
+        </div>    
+      )}
       <div className="dashboard-header">
         <div className="header-left">
           <h1 className="month-header">{month}</h1>
