@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import MyCalendar from './components/MyCalendar';
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import Dashboard from './components/Dashboard';
 
 const apiCall = () => {
   axios.get('http://localhost:8080').then((data) => {
@@ -26,6 +27,7 @@ function App() {
                     <Route path='/cal' element={<MyCalendar />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/selection" element={<Selection />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                 </Routes>
             </div>
         </Router>
