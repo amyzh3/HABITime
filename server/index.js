@@ -252,8 +252,11 @@ app.post('/createuser', async (req, res) => {
     );
 
     const { tokens } = await oAuth2Client.getToken(code);
+
+
     console.log('OBTAINED TOKENS', tokens);
 
+    oAuth2Client.setCredentials(tokens);
 
     // gets simplified calendar events
     const calEvents = await getCalendarEvents(oAuth2Client);
