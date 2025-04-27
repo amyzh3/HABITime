@@ -10,6 +10,12 @@
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+.filter-choice.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none; /* Prevent clicks */
+}
+
 .filter-choice:hover {
     background-color: #c8d8c8;
 }
