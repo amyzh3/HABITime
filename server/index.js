@@ -52,24 +52,7 @@ async function loadTokensFromFirestore(userId) {
   return doc.exists ? doc.data().tokens : null;
 }
 
-// async function getCalendarEvents(userId) {
-//   const tokens = await loadTokensFromFirestore(userId);
-//   if (!tokens) throw new Error('No tokens found for user');
 
-//   const oauth2Client = new google.auth.OAuth2();
-//   oauth2Client.setCredentials(tokens);
-
-//   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-//   const response = await calendar.events.list({
-//     calendarId: 'primary',
-//     timeMin: new Date().toISOString(),
-//     maxResults: 20,
-//     singleEvents: true,
-//     orderBy: 'startTime',
-//   });
-
-//   return response.data.items || [];
-// }
 
 async function getCalendarEvents(tokens) {
   // const tokens = await loadTokensFromFirestore(userId);
@@ -93,27 +76,79 @@ async function getCalendarEvents(tokens) {
       singleEvents: true,
       orderBy: 'startTime',
     });
-    return response.data.items || [];
+    const events = response.data.items || [];
+
+    const simplifiedEvents = events.map(event => ({
+      summary: event.summary || '',
+      startTime: event.start?.dateTime || '',
+      endTime: event.end?.dateTime || '',
+      location: event.location || '',
+    }));
+
+    return simplifiedEvents;
   } catch (error) {
     console.error('Error fetching calendar events:', error);
     throw error;
   }
 }
+// check if user already exists
+app.get('/existing-user', async (req, res) => {
+  try {
+    const { uid } = req.query;
+    const usersRef = db.collection('users');
+    const querySnapshot = await usersRef.where('uid', '==', uid).get();
+
+    if (!querySnapshot.empty) {
+      console.log('User already exists.');
+      return res.status(200).send({ message: 'User already exists', id: querySnapshot.docs[0].id });
+    } else {
+      console.log('User does not exist.');
+      return res.status(404).send({ message: 'User not found' });
+    }
+  } catch (e) {
+      console.error('Error checking for existing user:', e);
+      res.status(500).send({ error: 'Internal server error' });
+  }
+
+});
+
+
+// app.get('/login', async (req, res) => {
+//   // get uid and code
+//   // call get events? 
+//   // return nickname, uid, issues, events
+// });
+
+// // return concerns, habits, recommendations, events
+// app.get('/userinfo')
+
 
 // add a user to the database: auth (string), age (int), nickname (string)
+// generate recommendations and gcal events and store in database
 // targetConcerns (list of strings), improveAreas (list of strings)
 app.post('/createuser', async (req, res) => {
   console.log('IN createuser ENDPOINT');
   console.log(req.body);
   try {
-    const { code, nickname, age, concerns, habits } = req.body;
+    const { code, uid, nickname, age, concerns, habits } = req.body;
     console.log(code);
+    console.log(uid);
     console.log(nickname);
     console.log(age);
     console.log(concerns);
     console.log(habits);
 
-    // Exchange authorization code for access + refresh tokens
+    // if user already exists, just redirect to login endpoint
+    const usersRef = db.collection('users');
+    const querySnapshot = await usersRef.where('uid', '==', uid).get();
+
+    if (!querySnapshot.empty) {
+      console.log('User already exists. Redirecting to /login...');
+      return res.status(302).send({ redirectUrl: '/login' }); // should not get here bc already handles before /createuser is called
+      // 302 = Found (redirect), frontend handles it
+    }
+
+    // exchange authorization code for access + refresh tokens
     console.log('TRYING TO GET TOKENS');
     const oAuth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
@@ -124,15 +159,19 @@ app.post('/createuser', async (req, res) => {
     const { tokens } = await oAuth2Client.getToken(code);
     console.log('OBTAINED TOKENS', tokens);
 
-    const events = await getCalendarEvents(tokens);
 
-    console.log('Events: ', events);
+    // gets simplified calendar events
+    const calEvents = await getCalendarEvents(tokens);
+
+    console.log('Events: ', calEvents);
 
     // Create user document first
     const docRef = await db.collection('users').add({
       code,
+      uid,
       age,
       nickname,
+      calEvents,
       concerns,
       habits,
       createdAt: new Date()
@@ -158,8 +197,13 @@ app.post('/createuser', async (req, res) => {
   }
 });
 
+// get, store, return calendar updates
+// given calendar updates, generate, store, return new recommendations
+
+// app.post('/update-cal')
+
 // given auth, modifies list of new target concerns + improvement areas
-// generates and stores new recommendations
+// generates, store, return new recommendations
 app.post('/modify-concerns', async (req, res) => {
   try {
     const { userId, targetConcerns, improvementAreas } = req.body;

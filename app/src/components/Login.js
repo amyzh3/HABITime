@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import { auth, provider } from "../firebase";
 import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 import '../styles/login.css';
 
 export default function Login() {
@@ -27,6 +28,33 @@ export default function Login() {
             setUser(result.user);
             console.log("Signed up:", result.user);
             localStorage.setItem("uid", result.user.uid);
+            try {    
+                const newUserRes = await axios.get('http://localhost:8080/existing-user', {
+                    params: { uid: result.user.uid },
+                    headers: {
+                    'Content-Type': 'application/json',
+                    }
+                });
+                if(newUserRes.status == 200) {
+                    console.log('user already exists, redirecting to /login');
+                    await axios.get('http://localhost:8080/login', { uid: result.user.uid }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    navigate("/cal"); // process login then send them to /cal
+                    return;
+                } else if(newUserRes.status == 404) {
+
+                }
+            } catch(e) {
+                if (e.response && e.response.status === 404) {
+                    console.log('user doesnt exist continue signup');
+                } else {
+                    console.error('Error checking existing user:', e);
+                    return; // stop if unexpected error
+                }
+            }
 
             const client = window.google.accounts.oauth2.initCodeClient({
                 client_id: "337868506427-vd8hnb3qhpjbohmbcdn43fqsc41tut3i.apps.googleusercontent.com", // Google Cloud OAuth Client ID

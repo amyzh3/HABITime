@@ -25,6 +25,7 @@ function Preferences({ nickname, age}) {
         console.log(formData)
         const userData = {
             code: localStorage.getItem("googleAuthCode"),
+            uid: localStorage.getItem("uid"),
             nickname,
             age,
             concerns: formData.concerns,
@@ -37,7 +38,10 @@ function Preferences({ nickname, age}) {
                     'Content-Type': 'application/json',
                 }
             });
-    
+            if (response.status === 302) {
+                window.location.href = response.data.redirectUrl;
+                console.log('user already exists. redirected to /login');
+              }
             console.log('User created successfully:', response.data);
             navigate("/cal");
         } catch (error) {
