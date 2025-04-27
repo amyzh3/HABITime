@@ -42,6 +42,7 @@ export default function Edit() {
                                 setSelectedConcerns(updatedData.concerns);
                                 setSelectedHabits(updatedData.habits);
                             }}
+                            modification={true}
                         />
                     </div>
             </div>

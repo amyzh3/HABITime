@@ -13,7 +13,7 @@ const fullhabits = [
     "Journaling", "Healthy Eating", "Regular Exercise", "Limited Screen Time", "Reading", "Sleep Eight Hours"
 ];
 
-function Preferences({ nickname, age, formDataProp, updateData }) {
+function Preferences({ nickname, age, formDataProp, updateData, modification }) {
     const [formData, setFormData] = useState(formDataProp || { concerns: [], habits: [] });
     const user = localStorage.getItem("uid");
 
@@ -55,9 +55,37 @@ function Preferences({ nickname, age, formDataProp, updateData }) {
         }
     };
 
+    const handleModifyConcerns = async (e) => {
+        console.log(nickname);
+        console.log(age);
+        console.log(formData);
+        const updatedData = {
+            uid: localStorage.getItem("uid"),
+            newConcerns: formData.concerns,
+            newHabits: formData.habits
+        };
+        console.log('updatedData: ', updatedData);
+        try {
+            const response = await axios.post('http://localhost:8080/modify-concerns', updatedData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (response.status === 200) {
+                console.log('Concerns updated successfully:', response.data);
+                navigate("/dashboard");
+                // need to also store 
+            }
+        } catch (error) {
+            console.error("Error modifying concerns:", error);
+        }
+    };
+
     const handleUpdateData = (updatedData) => {
         setFormData(updatedData);
     };
+
+    const handleSubmit = modification ? handleModifyConcerns : handleSubmitPreferences;
 
     return (
         <div className="center-block">
@@ -89,7 +117,7 @@ function Preferences({ nickname, age, formDataProp, updateData }) {
                     ))}
                 </div>
             </form>
-            <button id="submit-choices" onClick={handleSubmitPreferences}>Continue</button>
+            <button id="submit-choices" onClick={handleSubmit}>Continue</button>
         </div>
     );
 }

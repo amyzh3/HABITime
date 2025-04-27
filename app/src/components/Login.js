@@ -24,6 +24,7 @@ export default function Login() {
             if (response.data.exists) {
                 console.log('User is already registered');
                 setUser(result.user);
+                localStorage.setItem("profile-imgURL", result.user.photoURL);
                 localStorage.setItem("uid", uid);
                 navigate('/dashboard');
             } else {
@@ -41,6 +42,7 @@ export default function Login() {
         try {
             const result = await signInWithPopup(auth, provider);
             setUser(result.user);
+            localStorage.setItem("profile-imgURL", result.user.photoURL);
             console.log("Signed up:", result.user);
             // localStorage.setItem("googleAuthCode", result)
             localStorage.setItem("uid", result.user.uid);
@@ -87,6 +89,7 @@ export default function Login() {
                 access_type: 'offline',
                 ux_mode: 'popup',
                 callback: async (response) => {
+                    console.log('response: ', response);
                     console.log('Authorization code:', response.code);
                     localStorage.setItem('googleAuthCode', response.code);
                     setAuthCode(response.code);

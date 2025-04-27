@@ -260,7 +260,11 @@ export default function Dashboard() {
           <button className="journal-button" onClick={handleJournalClick}>
             <IoIosJournal size={24} color="#53413E" className={journalClicked ? "icon-clicked" : ""}/>
           </button>
-          <img className="pfp-img" src={minion} alt="minion pfp"/>
+          <img
+            className="pfp-img"
+            src={localStorage.getItem("profile-imgURL") || minion}
+            alt="profile picture"
+          />
         </div>
       </div>
       <div className="dashboard-body">

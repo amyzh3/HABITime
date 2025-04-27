@@ -141,6 +141,7 @@ async function getCalendarEvents(tokens) {
     throw error;
   }
 }
+
 // check if user already exists
 app.get('/existing-user', async (req, res) => {
   try {
@@ -162,15 +163,6 @@ app.get('/existing-user', async (req, res) => {
 
 });
 
-
-// app.get('/login', async (req, res) => {
-//   // get uid and code
-//   // call get events? 
-//   // return nickname, uid, issues, events
-// });
-
-// // return concerns, habits, recommendations, events
-// app.get('/userinfo')
 
 // authenticate user
 app.post('/login', async (req, res) => {
@@ -291,7 +283,7 @@ app.post('/createuser', async (req, res) => {
 app.post('/modify-concerns', async (req, res) => {
   try {
     const { uid, newConcerns, newHabits } = req.body;
-
+    console.log(uid, newConcerns, newHabits);
     // get user from db
     // get the user doc from uid to update
     const querySnapshot = await db.collection('users').where('uid', '==', uid).get();
