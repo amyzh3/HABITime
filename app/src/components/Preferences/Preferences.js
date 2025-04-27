@@ -1,23 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Choices from "./Choices";
 import "./Preferences.css";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
 const fullconcerns = [
-    "Depression", "Anxiety", "Chronic-fatigue", "Bad-posture", "Back-pain", "Constipation",
-    "Vitamin-D-deficiency"
+    "Depression", "Anxiety", "Chronic Fatigue", "Bad Posture", "Back Pain", "Constipation",
+    "Vitamin D Deficiency"
 ];
 
 const fullhabits = [
-    "Journaling", "Healthy-eating", "Regular-exercise", "Limited-screen-time", "Reading", "Sleep-eight-hours"
+    "Journaling", "Healthy Eating", "Regular Exercise", "Limited Screen Time", "Reading", "Sleep Eight Hours"
 ];
 
-function Preferences({ nickname, age}) {
-    const [formData, setFormData] = useState({ concerns: [], habits: [] });
+function Preferences({ nickname, age, formDataProp, updateData }) {
+    const [formData, setFormData] = useState(formDataProp || { concerns: [], habits: [] });
     const user = localStorage.getItem("uid");
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (formDataProp) {
+            setFormData(formDataProp);
+        }
+    }, [formDataProp]);
 
     const handleSubmitPreferences = async (e) => {
         console.log(nickname)

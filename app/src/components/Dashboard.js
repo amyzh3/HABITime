@@ -6,6 +6,7 @@ import minion from "../assets/minion.jpg";
 import { BiSolidEdit } from "react-icons/bi";
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 export default function Dashboard() {
@@ -17,6 +18,8 @@ export default function Dashboard() {
   const [habits, setHabits] = useState([]); // for user habits
   const [loading, setLoading] = useState(true);
   const [month, setMonth] = useState("");
+
+  const navigate = useNavigate();
 
 
   const handleResyncClick = () => {
@@ -32,6 +35,7 @@ export default function Dashboard() {
   const handleEditClick = () => {
     setEditClicked(true);
     setTimeout(() => setEditClicked(false), 500);
+    navigate("/edit");
   };
 
   const colorMap = {

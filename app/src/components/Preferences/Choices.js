@@ -3,7 +3,6 @@ import "./Choices.css";
 
 function Choices({ filterName, updateData, formData, type }) {
     const isSelected = formData && formData[type] && formData[type].includes(filterName);
-    const [isClicked, setIsClicked] = useState(isSelected);
     const isDisabled = formData[type]?.length >= 3 && !isSelected;
 
     const handleClick = () => {
@@ -15,14 +14,13 @@ function Choices({ filterName, updateData, formData, type }) {
                 : [...formData[type], filterName],
         };
         updateData(updatedData);
-        setIsClicked(!isClicked);
     };
 
     return (
         <div
             onClick={handleClick}
             // className={`filter-choice ${isClicked ? "when-clicked" : "when-not-clicked"}`}
-            className={`filter-choice ${isClicked ? "when-clicked" : "when-not-clicked"} ${isDisabled ? "disabled" : ""}`}
+            className={`filter-choice ${isSelected ? "when-clicked" : "when-not-clicked"} ${isDisabled ? "disabled" : ""}`}
             style={{ cursor: isDisabled ? "not-allowed" : "pointer" }}
         >
             <h1 className="filter-text">{filterName}</h1>

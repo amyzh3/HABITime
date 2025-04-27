@@ -9,6 +9,7 @@ import './App.css';
 import MyCalendar from './components/MyCalendar';
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Dashboard from './components/Dashboard';
+import Edit from './components/Edit';
 
 const apiCall = () => {
   axios.get('http://localhost:8080').then((data) => {
@@ -28,6 +29,7 @@ function App() {
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/selection" element={<Selection />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/edit" element={<Edit />} />
                 </Routes>
             </div>
         </Router>
