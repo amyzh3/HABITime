@@ -267,6 +267,23 @@ app.post('/createuser', async (req, res) => {
 
     console.log("Gemini: ", recommendations);
 
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // Sunday = 0, Saturday = 6
+
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - dayOfWeek);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    // format date as MM/DD
+    const formatDate = (date) => `${date.getMonth() + 1}/${date.getDate()}`;
+    const weekRange = `${formatDate(startOfWeek)}-${formatDate(endOfWeek)}`;
+    console.log('weekRange: ', weekRange);
+    const moodDataList = {
+      [weekRange]: ['','']
+    };
+
     // Create user document first
     const docRef = await db.collection('users').add({
       code,
@@ -277,6 +294,7 @@ app.post('/createuser', async (req, res) => {
       concerns,
       habits,
       recommendations,
+      moodData: moodDataList,
       createdAt: new Date()
     });
 
@@ -419,8 +437,8 @@ app.get('/getuserinfo', async (req, res) => {
 app.post('/log-mood', async (req, res) => {
   try {
     const { uid, mood } = req.body;
-    if (!uid || !mood) {
-      return res.status(400).json({ message: 'uid and mood are required' });
+    if (!uid) {
+      return res.status(400).json({ message: 'uid is required' });
     }
 
     const querySnapshot = await db.collection('users').where('uid', '==', uid).get();
@@ -436,16 +454,15 @@ app.post('/log-mood', async (req, res) => {
     const dayOfWeek = today.getDay(); // Sunday = 0, Saturday = 6
 
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - dayOfWeek);
+    startOfWeek.setDate(`${today.getDate() - dayOfWeek}`);
 
     // calculating week range string
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     const formatDate = (date) => `${date.getMonth() + 1}/${date.getDate()}`;
     const weekRange = `${formatDate(startOfWeek)}-${formatDate(endOfWeek)}`;
-    console.log('weekRange:', weekRange);
 
-    const weekArray = weekEntry[weekRange];
+    const weekArray = moodData[weekRange];
     weekArray[dayOfWeek] = mood;
 
     await userRef.update({
@@ -453,7 +470,6 @@ app.post('/log-mood', async (req, res) => {
       updatedAt: new Date()
     });
 
-    console.log(`Mood logged for user ${uid}:`, mood);
 
     return res.status(200).json({ message: 'Mood logged successfully' });
 

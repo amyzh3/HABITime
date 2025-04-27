@@ -16,6 +16,7 @@ const prompt_tail =
 `
 \nYour response should ONLY be a JSON array of events that contain the same keys: "start", "end", "title", and "allDay" as well as either a "concern" key with the value as the concern it is targeting or a "habit key" with the value as the habit it is targeting.
 There should be five keys per entry in total: "start", "end", "title", "allDay", and EITHER "concern" OR "habit".
+The "concern" value MUST be one of the concerns given above, and the "habit" value also MUST be one of the habits given above.
 If there is no space in the week for new events, return an empty array.
 Return in plain text without \`\`\`json \`\`\`. NO MARKDOWN.
 `;
