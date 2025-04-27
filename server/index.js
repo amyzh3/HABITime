@@ -269,7 +269,7 @@ app.get('/calendar/events', async (req, res) => {
 });
 
 // get user info
-app.get('/userinfo', async (req, res) => {
+app.get('/getuserinfo', async (req, res) => {
   try {
     const { uid } = req.query;
     // const uid = "L5lRkUqonQXQZXLuCFjAOEk7mJg2"; // for testing
