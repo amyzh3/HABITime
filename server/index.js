@@ -126,19 +126,19 @@ async function getGeminiRecs(events, concerns, habits) {
   }
 }
 
-async function getCalendarEvents(tokens) {
+async function getCalendarEvents(oauth2Client) {
   // const tokens = await loadTokensFromFirestore(userId);
-  if (!tokens) throw new Error('No tokens found for user');
+  if (!oauth2Client) throw new Error('no oauth2client given');
 
   console.log("In calendar events");
 
-  const oauth2Client = new google.auth.OAuth2();
+  // const oauth2Client = new google.auth.OAuth2();
 
-  oauth2Client.setCredentials(tokens);
+  // oauth2Client.setCredentials(tokens);
 
   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
-  console.log(calendar.calendarList);
+  console.log("LOG FOR DEBUGGING");
+  // console.log(calendar.calendarList);
 
   try {
     const response = await calendar.events.list({
@@ -256,7 +256,7 @@ app.post('/createuser', async (req, res) => {
 
 
     // gets simplified calendar events
-    const calEvents = await getCalendarEvents(tokens);
+    const calEvents = await getCalendarEvents(oAuth2Client);
 
     console.log('Events: ', calEvents);
 
@@ -331,51 +331,63 @@ app.post('/modify-concerns', async (req, res) => {
 
 // get calendar events, updates db, regenerate recommendations
 app.post('/update-cal', async (req, res) => {
-  const { uid } = req.body;
-  console.log('userid:', uid);
+  try {
+    const { uid } = req.body;
+    console.log('userid:', uid);
 
-  // get and refresh tokens if needed
-  const tokens = await loadTokensFromFirestore(uid);
-  const oAuth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-  );
-  console.log("tokens", tokens);
-  oAuth2Client.setCredentials({
-            access_token: tokens.access_token,
-            refresh_token: tokens.refresh_token,
-          });
-  oAuth2Client.on('tokens', async (tokens) => {
-    if (tokens.refresh_token) {
-      // save refreshed tokens
-      await saveUserTokens(uid, tokens);
+    // get and refresh tokens if needed
+    const tokens = await loadTokensFromFirestore(uid);
+    const oAuth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+    );
+    console.log("tokens", tokens);
+
+    oAuth2Client.setCredentials({
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+    });
+
+    oAuth2Client.on('tokens', async (newTokens) => {
+      if (newTokens.refresh_token) {
+        await saveUserTokens(uid, newTokens);
+      }
+    });
+
+    console.log('obtained/refreshed tokens', tokens);
+
+    const events = await getCalendarEvents(oAuth2Client);
+    console.log('Events: ', events);
+
+    // get the user doc from uid to update
+    const querySnapshot = await db.collection('users').where('uid', '==', uid).get();
+    if (querySnapshot.empty) {
+      console.error('No matching document found');
+      return res.status(404).json({ message: 'No matching user found' });
     }
-  });
-  console.log('obtained/refreshed tokens', tokens);
 
-  const events = await getCalendarEvents(tokens);
-  console.log('Events: ', events);
+    const doc = querySnapshot.docs[0];
+    const userRef = db.collection('users').doc(doc.id);
+    const targetConcerns = doc.data().concerns;
+    const improvementAreas = doc.data().habits;
 
-  // get the user doc from uid to update
-  const querySnapshot = await db.collection('users').where('uid', '==', uid).get();
-  if (querySnapshot.empty) {
-    console.error('No matching document found');
-    return null;
-  }
-  const doc = querySnapshot.docs[0];
-  const userRef = db.collection('users').doc(doc.id);
-  const targetConcerns = doc.data().concerns;
-  const improvementAreas = doc.data().habits;
-
-  const newRecommendations = await getGeminiRecs(events, targetConcerns, improvementAreas);
-  console.log('new recommendations', newRecommendations);
+    const newRecommendations = await getGeminiRecs(events, targetConcerns, improvementAreas);
+    console.log('new recommendations', newRecommendations);
 
     await userRef.update({
       calEvents: events,
       recommendations: newRecommendations,
       updatedAt: new Date()
     });
+
     console.log('calendar events updated');
+
+    return res.status(200).json({ message: 'Calendar updated successfully'});
+
+  } catch (error) {
+    console.error('Error updating calendar:', error);
+    return res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
 });
 
 // get user info

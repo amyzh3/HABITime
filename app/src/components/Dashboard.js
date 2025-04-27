@@ -27,10 +27,15 @@ export default function Dashboard() {
     setTimeout(() => setResyncClicked(false), 500);
     
     try {
+      console.log('resyncing calendar!');
+      setDataReady(false);
       const uid = localStorage.getItem("uid");
       const response = await axios.post('http://localhost:8080/update-cal', { uid });
       console.log('Calendar data resynced successfully & changes stored in database:', response.data);
-
+      if(response.status == 200){
+        await fetchData(uid);
+        console.log('called fetch data');
+      }
     } catch (error) {
       console.error("Error during resync:", error);
     }
