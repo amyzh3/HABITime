@@ -13,10 +13,25 @@ export default function Login() {
     const handleLogin = async () => {
         try {
           const result = await signInWithPopup(auth, provider);
-          setUser(result.user);
-          console.log("Logged in:", result.user);
-          localStorage.setItem("uid", result.user.uid);
-          navigate("/cal");
+          const uid = result.user.uid;
+
+            const response = await axios.post('http://localhost:8080/login', { uid }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.data.exists) {
+                console.log('User is already registered');
+                setUser(result.user);
+                localStorage.setItem("uid", uid);
+                navigate('/dashboard');
+            } else {
+                console.log('New user. Redirecting to sign-up');
+                alert("New user. Please sign up instead.");
+                window.location.reload();
+            }
+
         } catch (error) {
           console.error("Login failed:", error);
         }
@@ -27,6 +42,7 @@ export default function Login() {
             const result = await signInWithPopup(auth, provider);
             setUser(result.user);
             console.log("Signed up:", result.user);
+            localStorage.setItem("googleAuthCode", result)
             localStorage.setItem("uid", result.user.uid);
             try {    
                 const newUserRes = await axios.get('http://localhost:8080/existing-user', {
@@ -35,17 +51,26 @@ export default function Login() {
                     'Content-Type': 'application/json',
                     }
                 });
-                if(newUserRes.status == 200) {
+                if(newUserRes.status === 200) {
                     console.log('user already exists, redirecting to /login');
-                    await axios.get('http://localhost:8080/login', { uid: result.user.uid }, {
+                    // await axios.get('http://localhost:8080/login', { uid: result.user.uid }, {
+                    //     headers: {
+                    //         'Content-Type': 'application/json',
+                    //     }
+                    // });
+                    const response = await axios.post('http://localhost:8080/login', { uid: result.user.uid }, {
                         headers: {
                             'Content-Type': 'application/json',
-                        }
+                        },
                     });
-                    navigate("/cal"); // process login then send them to /cal
-                    return;
-                } else if(newUserRes.status == 404) {
 
+                    if (response.data.exists) {
+                        console.log('User is already registered');
+                        setUser(result.user);
+                        localStorage.setItem("uid", result.user.uid);
+                        navigate('/dashboard');
+                    }
+                    return;
                 }
             } catch(e) {
                 if (e.response && e.response.status === 404) {

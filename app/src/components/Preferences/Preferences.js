@@ -49,7 +49,7 @@ function Preferences({ nickname, age, formDataProp, updateData }) {
                 console.log('user already exists. redirected to /login');
               }
             console.log('User created successfully:', response.data);
-            navigate("/cal");
+            navigate("/dashboard");
         } catch (error) {
             console.error("Error creating user:", error);
         }

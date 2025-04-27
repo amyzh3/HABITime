@@ -122,6 +122,37 @@ app.get('/existing-user', async (req, res) => {
 // // return concerns, habits, recommendations, events
 // app.get('/userinfo')
 
+// authenticate user
+app.post('/login', async (req, res) => {
+  console.log('IN login ENDPOINT');
+  console.log(req.body);
+
+  try {
+    const { uid } = req.body; // Get UID from request body
+
+    // Check if UID is provided
+    if (!uid) {
+      return res.status(400).send({ error: 'UID is required' });
+    }
+
+    // Query the database to check if the user already exists by UID
+    const userSnapshot = await db.collection('users').where('uid', '==', uid).get();
+
+    // If user exists in the database, return true (they are a logged-in user)
+    if (!userSnapshot.empty) {
+      console.log('User found in database');
+      return res.status(200).send({ exists: true }); // User exists, return true
+    }
+
+    // If user doesn't exist, return false (they need to sign up)
+    console.log('User not found in database');
+    res.status(200).send({ exists: false }); // User not found, return false
+
+  } catch (error) {
+    console.error('Error checking user existence:', error);
+    res.status(500).send({ error: 'Failed to check user existence' });
+  }
+});
 
 // add a user to the database: auth (string), age (int), nickname (string)
 // generate recommendations and gcal events and store in database
