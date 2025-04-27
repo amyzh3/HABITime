@@ -5,16 +5,23 @@ These are the preexisting events a user has in their calendar from Sunday to Sat
 START OF EVENTS\n
 `;
 
-const prompt_tail =
+const prompt_mid =
 `
 \nEND OF EVENTS
-Suggest 3 to 7 new events that this user can do during the week that does not overlap with these preexisting events to help the user combat depression.
-If a preexisting event is marked as all-day, there cannot be any new events suggested on that day.
-Your response should ONLY be a JSON array of events that contain the same keys: "start", "end", "title", and "allDay". If there is no space in the week for new events, return an empty array.
-Return in plain text without \`\`\`json \`\`\`
+Suggest 3 to 7 new events that this user can do during the week that does not overlap with these preexisting events to help the user address these following concerns and reinforce these following habits.
+Each new event should address only ONE concern or habit.
+`;
+
+const prompt_tail = 
+`
+\nYour response should ONLY be a JSON array of events that contain the same keys: "start", "end", "title", and "allDay" as well as either a "concern" key with the value as the concern it is targeting or a "habit key" with the value as the habit it is targeting.
+There should be five keys per entry in total: "start", "end", "title", "allDay", and EITHER "concern" OR "habit".
+If there is no space in the week for new events, return an empty array.
+Return in plain text without \`\`\`json \`\`\`. NO MARKDOWN.
 `;
 
 module.exports = {
     prompt_head,
+    prompt_mid,
     prompt_tail,
 };

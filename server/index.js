@@ -5,7 +5,7 @@ const PORT = 8080;
 const cors = require('cors');
 
 // import Gemini prompt
-const { prompt_head, prompt_tail } = require('./prompts');
+const { prompt_head, prompt_mid, prompt_tail } = require('./prompts');
 
 // dotenv config
 const dotenv =require('dotenv');
@@ -71,7 +71,7 @@ async function loadTokensFromFirestore(uid) {
   return doc.exists ? doc.data().tokens : null;
 }
 
-async function getGeminiRecs(events) {
+async function getGeminiRecs(events, concerns, habits) {
   await loadGenAI();
 
   var prompt = prompt_head;
@@ -81,6 +81,18 @@ async function getGeminiRecs(events) {
     prompt += '\n';
   });
   
+  prompt += prompt_mid;
+
+  prompt += "\nConcerns: "
+  concerns.forEach(concern => {
+    prompt += concern + ", ";
+  });
+
+  prompt += "\nHabits: "
+  habits.forEach(habit => {
+    prompt += habit + ", ";
+  });
+
   prompt += prompt_tail;
 
   console.log("Prompt ", prompt);
@@ -129,7 +141,7 @@ async function getCalendarEvents(tokens) {
     const events = response.data.items || [];
 
     const simplifiedEvents = events.map(event => ({
-      summary: event.summary || '',
+      title: event.summary || '',
       startTime: event.start?.dateTime || '',
       endTime: event.end?.dateTime || '',
       location: event.location || '',
@@ -238,7 +250,7 @@ app.post('/createuser', async (req, res) => {
 
     console.log('Events: ', calEvents);
 
-    const geminiEvents = await getGeminiRecs(calEvents);
+    const geminiEvents = await getGeminiRecs(calEvents, concerns, habits);
 
     console.log("Gemini: ", geminiEvents);
 
