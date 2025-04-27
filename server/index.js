@@ -46,9 +46,16 @@ async function saveUserTokens(userId, tokens) {
   await userRef.set({ tokens }, { merge: true });
 }
 
-async function loadTokensFromFirestore(userId) {
-  const userRef = db.collection('users').doc(userId);
-  const doc = await userRef.get();
+
+async function loadTokensFromFirestore(uid) {
+  const querySnapshot = await db.collection('users').where('uid', '==', uid).get();
+
+  if (querySnapshot.empty) {
+    console.error('No matching document found');
+    return null;
+  }
+
+  const doc = querySnapshot.docs[0];
   return doc.exists ? doc.data().tokens : null;
 }
 
@@ -231,32 +238,34 @@ app.post('/createuser', async (req, res) => {
 // get, store, return calendar updates
 // given calendar updates, generate, store, return new recommendations
 
-// app.post('/update-cal')
 
 // given auth, modifies list of new target concerns + improvement areas
 // generates, store, return new recommendations
 app.post('/modify-concerns', async (req, res) => {
   try {
-    const { userId, targetConcerns, improvementAreas } = req.body;
+    const { uid, newConcerns, newHabits } = req.body;
 
     // get user from db
-    const userRef = db.collection('users').doc(userId);
-
+    // get the user doc from uid to update
+    const querySnapshot = await db.collection('users').where('uid', '==', uid).get();
+    if (querySnapshot.empty) {
+      console.error('No matching document found');
+      return null;
+    }
+    const doc = querySnapshot.docs[0];
+    const userRef = db.collection('users').doc(doc.id);
     // TODO: generate new recommendations based on the new concerns/areas
     // ex: 
-    // const newTargetConcerns = generateRecommendations(targetConcerns);
-    // const newImprovementAreas = generateRecommendations(improvementAreas)
+    // const newRecommendations = generateRecommendations(targetConcerns, improvementAres);
 
     // update the user's targetConcerns and improvementAreas
-    // await userRef.update({
-    //   targetConcerns: newTargetConcerns,
-    //   improvementAreas: newImprovementAreas,
-    //   updatedAt: new Date()
-    // });
+    await userRef.update({
+      concerns: newConcerns,
+      habits: newHabits,
+      updatedAt: new Date()
+    });
 
     console.log("processing concern modification");
-
-
 
     res.status(200).send({ message: 'User concerns and improvement areas updated!' });
   } catch (error) {
@@ -265,38 +274,54 @@ app.post('/modify-concerns', async (req, res) => {
   }
 });
 
-// get calendar events
-app.get('/calendar/events', async (req, res) => {
-  try {
-    // assume user's access token is sent from frontend (eg. via auth header or cookie)
-    const userAccessToken = req.headers.authorization?.split('Bearer ')[1];
+// get calendar events, updates db, regenerate recommendations
+app.post('/update-cal', async (req, res) => {
+  const { uid } = req.body;
+  console.log('userid:', uid);
 
-    if (!userAccessToken) {
-      return res.status(401).json({ error: 'Access token missing' });
+  // get and refresh tokens if needed
+  const tokens = await loadTokensFromFirestore(uid);
+  const oAuth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+  );
+  console.log("tokens", tokens);
+  oAuth2Client.setCredentials({
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+          });
+  oAuth2Client.on('tokens', async (tokens) => {
+    if (tokens.refresh_token) {
+      // save refreshed tokens
+      await saveUserTokens(uid, tokens);
     }
+  });
+  console.log('obtained/refreshed tokens', tokens);
 
-    // Set up OAuth2 client using user's token
-    const oauth2Client = new google.auth.OAuth2();
-    oauth2Client.setCredentials({ access_token: userAccessToken });
+  const events = await getCalendarEvents(tokens);
+  console.log('Events: ', events);
 
-    // Connect to Google Calendar API
-    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
-    // Fetch events from primary calendar
-    const response = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin: new Date().toISOString(), // optional: only future events
-      maxResults: 20,
-      singleEvents: true,
-      orderBy: 'startTime',
-    });
-
-    const events = response.data.items || [];
-    res.json(events);
-  } catch (error) {
-    console.error('Error fetching calendar events:', error);
-    res.status(500).json({ error: 'Failed to fetch calendar events' });
+  // get the user doc from uid to update
+  const querySnapshot = await db.collection('users').where('uid', '==', uid).get();
+  if (querySnapshot.empty) {
+    console.error('No matching document found');
+    return null;
   }
+  const doc = querySnapshot.docs[0];
+  const userRef = db.collection('users').doc(doc.id);
+
+
+    // TODO: generate new recommendations given the new events
+    // ex: 
+    // const newTargetConcerns = generateRecommendations(targetConcerns);
+    // const newImprovementAreas = generateRecommendations(improvementAreas)
+
+    // TODO: update the user's concerns and habits as well
+    await userRef.update({
+      calEvents: events,
+      updatedAt: new Date()
+    });
+    console.log('calendar events updated');
 });
 
 // get user info

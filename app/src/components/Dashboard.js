@@ -4,7 +4,7 @@ import { IoIosJournal } from "react-icons/io";
 import MyCalendar from "./MyCalendar";
 import minion from "../assets/minion.jpg";
 import { BiSolidEdit } from "react-icons/bi";
-
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -22,9 +22,18 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
 
-  const handleResyncClick = () => {
+  const handleResyncClick = async () => {
     setResyncClicked(true);
     setTimeout(() => setResyncClicked(false), 500);
+    
+    try {
+      const uid = localStorage.getItem("uid");
+      const response = await axios.post('http://localhost:8080/update-cal', { uid });
+      console.log('Calendar data resynced successfully & changes stored in database:', response.data);
+
+    } catch (error) {
+      console.error("Error during resync:", error);
+    }
   };
 
   const handleJournalClick = () => {
