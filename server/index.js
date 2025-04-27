@@ -4,6 +4,9 @@ const app = express();
 const PORT = 8080;
 const cors = require('cors');
 
+// import Gemini prompt
+const { prompt_head, prompt_tail } = require('./prompts');
+
 // dotenv config
 const dotenv =require('dotenv');
 dotenv.config();
@@ -11,6 +14,15 @@ dotenv.config();
 // firebase-admin for backend
 const admin = require("firebase-admin");
 const serviceAccount = require("./firebase-service-key.json");
+
+var genAI = null;
+
+// dynamic import genai
+async function loadGenAI() {
+  const { GoogleGenAI } = await import('@google/genai');
+  genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  console.log("@google/genai loaded");
+}
 
 // init Firebase Admin SDK
 admin.initializeApp({
@@ -59,7 +71,38 @@ async function loadTokensFromFirestore(uid) {
   return doc.exists ? doc.data().tokens : null;
 }
 
+async function getGeminiRecs(events) {
+  await loadGenAI();
 
+  var prompt = prompt_head;
+  
+  events.forEach(e => {
+    prompt += JSON.stringify(e);
+    prompt += '\n';
+  });
+  
+  prompt += prompt_tail;
+
+  console.log("Prompt ", prompt);
+
+  try {
+    const result = await genAI.models.generateContent({
+        model: "gemini-2.5-pro-exp-03-25",
+        contents: [
+            {
+                parts: [{ text: prompt }],
+            },
+        ],
+    });
+
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
+    console.log(text);
+    return text == "No response" ? [] : JSON.parse(text);
+
+  } catch (error) {
+      console.error(error);
+  }
+}
 
 async function getCalendarEvents(tokens) {
   // const tokens = await loadTokensFromFirestore(userId);
@@ -202,6 +245,10 @@ app.post('/createuser', async (req, res) => {
     const calEvents = await getCalendarEvents(tokens);
 
     console.log('Events: ', calEvents);
+
+    const geminiEvents = await getGeminiRecs(calEvents);
+
+    console.log("Gemini: ", geminiEvents);
 
     // Create user document first
     const docRef = await db.collection('users').add({
