@@ -142,9 +142,9 @@ async function getCalendarEvents(tokens) {
 
     const simplifiedEvents = events.map(event => ({
       title: event.summary || '',
-      startTime: event.start?.dateTime || '',
-      endTime: event.end?.dateTime || '',
-      location: event.location || '',
+      start: event.start?.dateTime || '',
+      end: event.end?.dateTime || '',
+      // location: event.location || '',
     }));
 
     return simplifiedEvents;

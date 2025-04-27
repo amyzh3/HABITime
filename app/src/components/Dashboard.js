@@ -16,11 +16,11 @@ export default function Dashboard() {
   const [events, setEvents] = useState([]); // for calendar events
   const [concerns, setConcerns] = useState([]); // for user concerns
   const [habits, setHabits] = useState([]); // for user habits
-  const [loading, setLoading] = useState(true);
   const [month, setMonth] = useState("");
 
-  const navigate = useNavigate();
+  const [dataReady, setDataReady] = useState(false);
 
+  const navigate = useNavigate();
 
   const handleResyncClick = async () => {
     setResyncClicked(true);
@@ -64,188 +64,59 @@ export default function Dashboard() {
     "Sleep 8 Hours": "#D1F2EB",
   };
 
-  const userConcerns = ["Depression", "Back Pain", "Anxiety",];
-
-  const userHabits = ["Regular Exercise", "Healthy Eating", "Reading"];
-
-  const userCalendarEvents = [
-    {
-      start: new Date("2025-04-21T12:30:00"),
-      end: new Date("2025-04-21T13:50:00"),
-      title: "CSCI 353",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-21T14:00:00"),
-      end: new Date("2025-04-21T15:50:00"),
-      title: "ITP 435: Professional C++ (Lecture)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-22T09:30:00"),
-      end: new Date("2025-04-22T11:30:00"),
-      title: "Work (library)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-22T12:30:00"),
-      end: new Date("2025-04-22T13:50:00"),
-      title: "WRIT 340: Advanced Writing",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-22T14:00:00"),
-      end: new Date("2025-04-22T15:30:00"),
-      title: "OH (Office Hours)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-23T09:30:00"),
-      end: new Date("2025-04-23T12:00:00"),
-      title: "Work (library)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-23T12:30:00"),
-      end: new Date("2025-04-23T13:50:00"),
-      title: "CSCI 353",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-23T14:00:00"),
-      end: new Date("2025-04-23T15:50:00"),
-      title: "ITP 435: Professional C++ (Lecture)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-23T16:00:00"),
-      end: new Date("2025-04-23T17:00:00"),
-      title: "OH (Office Hours)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-24T11:30:00"),
-      end: new Date("2025-04-24T12:30:00"),
-      title: "OH (Office Hours)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-24T12:30:00"),
-      end: new Date("2025-04-24T13:50:00"),
-      title: "WRIT 340: Advanced Writing",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-24T14:00:00"),
-      end: new Date("2025-04-24T15:30:00"),
-      title: "OH (Office Hours)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-24T16:00:00"),
-      end: new Date("2025-04-24T17:00:00"),
-      title: "OH (Office Hours)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-25T09:00:00"),
-      end: new Date("2025-04-25T10:50:00"),
-      title: "PHED 148A: Archery (Lecture)",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-25T12:30:00"),
-      end: new Date("2025-04-25T13:50:00"),
-      title: "CSCI 353: Introduction",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-25T15:00:00"),
-      end: new Date("2025-04-25T16:00:00"),
-      title: "CSCI 467: Introduction",
-      allDay: false,
-    }
-  ];
-
-  const wellnessEvents = [
-    {
-      start: new Date("2025-04-21T07:30:00"),
-      end: new Date("2025-04-21T08:00:00"),
-      title: "Morning Stretch",
-      concern: "Back Pain",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-21T18:30:00"),
-      end: new Date("2025-04-21T19:00:00"),
-      title: "Evening Walk",
-      concern: "Regular Exercise",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-22T07:30:00"),
-      end: new Date("2025-04-22T08:00:00"),
-      title: "Meditation",
-      concern: "Anxiety",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-22T18:30:00"),
-      end: new Date("2025-04-22T19:30:00"),
-      title: "Healthy Dinner & Unplug",
-      habit: "Healthy Eating",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-23T07:00:00"),
-      end: new Date("2025-04-23T07:30:00"),
-      title: "Gratitude Journal",
-      concern: "Depression",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-23T19:00:00"),
-      end: new Date("2025-04-23T20:00:00"),
-      title: "Read 30 Minutes",
-      habit: "Reading",
-      allDay: false,
-    },
-    {
-      start: new Date("2025-04-25T19:30:00"),
-      end: new Date("2025-04-25T20:00:00"),
-      title: "Prepare for Sleep (No Screens)",
-      concern: "Anxiety",
-      allDay: false,
-    },
-  ];
-  
-  const fetchData = async () => {
+  const fetchData = async (uid) => {
     try {
-      setConcerns(userConcerns.map(concern => ({concern, color: colorMap[concern]})));
-      setHabits(userHabits.map(habit => ({habit, color: colorMap[habit]})));
-      setEvents([...userCalendarEvents, ...wellnessEvents].map(event => ({
-        ...event,
-        color: event.concern ? colorMap[event.concern] : event.habit ? colorMap[event.habit] : "#A7A7A7"
-      })));
-      const currentDate = new Date();
-      const monthString = currentDate.toLocaleString('default', { month: 'long' });
-      const year = currentDate.getFullYear();
-      setMonth(`${monthString} ${year}`);
-      console.log("concerns", concerns)
-      console.log("habits", habits)
-      console.log("events",events)
+      setDataReady(false);
+      // Fetch user data from backend
+      const response = await axios.get('http://localhost:8080/getuserinfo', {
+        params: { uid }, // Pass the UID as a query parameter
+      });
+
+      if (response.data && response.data.data) {
+        const userData = response.data.data;
+
+        const formattedEvents = userData.calEvents.map(event => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end),
+          color: event.concern ? colorMap[event.concern] : event.habit ? colorMap[event.habit] : "#A7A7A7",
+          allDay: event.allDay || false, // Default to false if not specified
+          title: event.title || "Untitled Event" // Ensure title exists
+        }));
+
+        console.log(formattedEvents);
+        setEvents(formattedEvents);  // Use the formatted events
+
+        // Set the user concerns, habits, and events
+        setConcerns(userData.concerns.map(concern => ({ concern, color: colorMap[concern] })));
+        setHabits(userData.habits.map(habit => ({ habit, color: colorMap[habit] })));
+
+        // Set the current month and year
+        const currentDate = new Date();
+        const monthString = currentDate.toLocaleString('default', { month: 'long' });
+        const year = currentDate.getFullYear();
+        setMonth(`${monthString} ${year}`);
+        setDataReady(true);
+      }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
-
     }
+  };
 
-  }
-  
   useEffect(() => {
-    setLoading(true);
-    fetchData();
-    setLoading(false);
+    const uid = localStorage.getItem('uid'); // Get UID from localStorage
+    if (uid) {
+      fetchData(uid); // Fetch user data if UID is found
+      console.log('fetch data done', events);
+    } else {
+      console.error("UID not found in localStorage");
+      // You might want to redirect to login if UID is missing
+    }
   }, []);
+
+  useEffect(() => {
+    console.log("events updated:", events);
+  }, [events]);
 
   return (
     <div className="dashboard-container">
@@ -292,7 +163,7 @@ export default function Dashboard() {
         </div>
         <div className="cal-container">
           {
-            loading ? (<div>Loading...</div>) 
+            !dataReady ? (<div>Loading...</div>)
             : (
               <MyCalendar events={events}/>
             )
