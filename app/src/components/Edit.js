@@ -6,28 +6,12 @@ import Preferences from "./Preferences/Preferences";
 
 export default function Edit() {
     const { state } = useLocation();
-    const [selectedConcerns, setSelectedConcerns] = useState([]);
-    const [selectedHabits, setSelectedHabits] = useState([]);
+    const [selectedConcerns, setSelectedConcerns] = useState(state?.concerns || []);
+    const [selectedHabits, setSelectedHabits] = useState(state?.habits || []);
 
     const navigate = useNavigate();
     const nickname = "";
     const age = "";
-
-
-    // TEST DATA
-    const userConcerns = ["Depression", "Back Pain", "Anxiety",];
-
-    const userHabits = ["Regular Exercise", "Healthy Eating", "Reading"];
-
-    const fetchSelectionData = async () => {
-      setSelectedConcerns(userConcerns);
-      setSelectedHabits(userHabits);
-    }
-    useEffect(() => {
-      (async () => {
-        await fetchSelectionData();
-      })();
-    }, []);
 
     return (
         <div className="container">

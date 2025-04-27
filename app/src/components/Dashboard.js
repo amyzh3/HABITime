@@ -44,7 +44,12 @@ export default function Dashboard() {
   const handleEditClick = () => {
     setEditClicked(true);
     setTimeout(() => setEditClicked(false), 500);
-    navigate("/edit");
+    navigate("/edit", {
+      state: {
+        concerns: concerns.map(c => c.concern), // Pass just the strings
+        habits: habits.map(h => h.habit)        // Pass just the strings
+      }
+    });
   };
 
   const colorMap = {
