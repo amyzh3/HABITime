@@ -110,9 +110,9 @@ export default function Login() {
         <div className="login-container">
             <div className="login-left">
                 <h1 className="title">Live healthier,</h1>
-                <p className="subtitle">one day at a time.</p>
+                <p className="subtitle">one habit at a time.</p>
                 <p className="description">
-                    Log in or sign up to Rootine<br />
+                    <b>Log in</b> or <b>sign up</b> to <i>HABITime</i><br />
                     with your Google account.
                 </p>
             </div>
