@@ -27,6 +27,7 @@ export default function Login() {
                 console.log('User is already registered');
                 setUser(result.user);
                 localStorage.setItem("profile-imgURL", result.user.photoURL);
+                console.log("set profile photo: ", localStorage.getItem("profile-imgURL"));
                 localStorage.setItem("uid", uid);
                 navigate('/dashboard');
             } else {
@@ -45,6 +46,7 @@ export default function Login() {
             const result = await signInWithPopup(auth, provider);
             setUser(result.user);
             localStorage.setItem("profile-imgURL", result.user.photoURL);
+            console.log("set profile photo: ", localStorage.getItem("profile-imgURL"));
             console.log("Signed up:", result.user);
             // localStorage.setItem("googleAuthCode", result)
             localStorage.setItem("uid", result.user.uid);
