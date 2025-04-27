@@ -267,6 +267,23 @@ app.post('/createuser', async (req, res) => {
 
     console.log("Gemini: ", recommendations);
 
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // Sunday = 0, Saturday = 6
+
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - dayOfWeek);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    // format date as MM/DD
+    const formatDate = (date) => `${date.getMonth() + 1}/${date.getDate()}`;
+    const weekRange = `${formatDate(startOfWeek)}-${formatDate(endOfWeek)}`;
+    console.log('weekRange: ', weekRange);
+    const moodDataList = {
+      [weekRange]: ['','']
+    };
+
     // Create user document first
     const docRef = await db.collection('users').add({
       code,
@@ -277,6 +294,7 @@ app.post('/createuser', async (req, res) => {
       concerns,
       habits,
       recommendations,
+      moodData: moodDataList,
       createdAt: new Date()
     });
 

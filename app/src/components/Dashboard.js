@@ -174,6 +174,11 @@ export default function Dashboard() {
           <div className="week-summary">
             {moodData ? (
               Object.entries(moodData).map(([week, emojis], index) => {
+                console.log(moodData);
+                if (!Array.isArray(emojis)) {
+                  console.log('emojis: ', emojis);
+                  emojis = [];
+                }
                 const today = new Date();
                 const thisMonth = today.getMonth(); // 0=January, 3=April, etc
                 if(emojis.length < 7){
