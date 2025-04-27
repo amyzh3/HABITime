@@ -80,23 +80,21 @@ export default function Dashboard() {
       if (response.data && response.data.data) {
         const userData = response.data.data;
 
-        const formattedEvents = userData.calEvents.map(event => ({
+        const formattedEvents = [...userData.calEvents, ...userData.recommendations].map(event => ({
           ...event,
           start: new Date(event.start),
           end: new Date(event.end),
           color: event.concern ? colorMap[event.concern] : event.habit ? colorMap[event.habit] : "#A7A7A7",
-          allDay: event.allDay || false, // Default to false if not specified
-          title: event.title || "Untitled Event" // Ensure title exists
+          allDay: event.allDay || false,
+          title: event.title || "Untitled Event"
         }));
 
         console.log(formattedEvents);
-        setEvents(formattedEvents);  // Use the formatted events
+        setEvents(formattedEvents);
 
-        // Set the user concerns, habits, and events
         setConcerns(userData.concerns.map(concern => ({ concern, color: colorMap[concern] })));
         setHabits(userData.habits.map(habit => ({ habit, color: colorMap[habit] })));
 
-        // Set the current month and year
         const currentDate = new Date();
         const monthString = currentDate.toLocaleString('default', { month: 'long' });
         const year = currentDate.getFullYear();
