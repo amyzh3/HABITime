@@ -1,0 +1,32 @@
+.filter-choice {
+    background-color: #E2ECD6;
+    color: #53413E;
+    border-radius: 6px;
+    border: 1px solid #9A8885;
+    padding: 12px 20px;
+    margin: 5px;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.filter-choice.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none; /* Prevent clicks */
+}
+
+.filter-choice:hover {
+    background-color: #c8d8c8;
+}
+
+.filter-choice.when-clicked {
+    background-color: #BECCAD;
+    transform: scale(1.05);
+}
+
+.filter-choice h1 {
+    font-size: 14px;
+    margin: 0;
+    font-weight: normal;
+}

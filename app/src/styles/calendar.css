@@ -1,0 +1,20 @@
+.rbc-calendar {
+  margin: auto;
+  background-color: white;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  color: #53413E;
+}
+.rbc-header {
+  padding: 30px;
+}
+
+.rbc-label {
+  font-size: 11px;
+}
+.rbc-time-header-cell .rbc-today {
+  background-color: darkgray;
+}
+
+

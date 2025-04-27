@@ -1,7 +1,16 @@
-import logo from './logo.svg';
 import axios from 'axios';
+import React from 'react';
+import Login from './components/Login';
+import Signup from './components/Signup'
+import Selection from './components/Selection'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import './App.css';
+import MyCalendar from './components/MyCalendar';
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import Dashboard from './components/Dashboard';
+import Edit from './components/Edit';
+
 const apiCall = () => {
   axios.get('http://localhost:8080').then((data) => {
     //this console.log will be in our frontend console
@@ -10,27 +19,21 @@ const apiCall = () => {
 }
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-
-        <button onClick={apiCall}>Make API Call</button>
-
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <Router>
+            <div>
+                <Routes>
+                    <Route path="/" element={<Login />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path='/cal' element={<MyCalendar />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/selection" element={<Selection />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/edit" element={<Edit />} />
+                </Routes>
+            </div>
+        </Router>
+    );
 }
 
 export default App;

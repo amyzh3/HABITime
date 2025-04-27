@@ -9,7 +9,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^0.10.0",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "firebase": "^11.6.1",
+    "firebase-admin": "^13.3.0",
+    "googleapis": "^148.0.0",
+    "@google/genai": "^0.10.0"
   }
 }

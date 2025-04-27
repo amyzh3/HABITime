@@ -1,0 +1,105 @@
+body {
+  height: 100vh;
+  width: 100vw;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+h1 {
+  font-family: 'Inter', sans-serif;
+  color: #53413E;
+}
+
+.dashboard-body {
+  display: flex;
+  padding: 0rem 2rem 1rem 2rem;
+
+}
+
+.header-left, .header-right {
+  display: flex;
+  align-items: center;
+}
+
+button {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+
+}
+
+.month-header {
+  color: #53413E;
+  margin-right: 0.5rem;
+}
+
+.pfp-img {
+  border-radius: 50%;
+  height: 50px;
+  width: 50px;
+  object-fit: cover;
+  margin-left: 0.5rem;
+  box-shadow: 0px 0px 8px rgba(83, 65, 62, 0.5);
+}
+
+.icon-clicked {
+  animation: jiggle 0.5s ease;
+}
+
+@keyframes jiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(10deg); }
+  50% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.sidebar {
+  width: 250px;
+  font-family: 'Inter', sans-serif;
+  color: #53413E;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+.cal-container {
+  width: 100%;
+  height: 75vh;
+}
+
+.concern-item, .habit-item {
+  border-radius: 5px;
+  padding: 0.5rem;
+  border: 1px solid #9A8885;
+  width: fit-content;
+  font-size: 13px;
+}
+
+.concerns-header, .habits-header {
+  margin-bottom: 0.5rem;
+}
+
+.concerns-container, .habits-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.edit-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #53413E;
+  padding: 0;
+  margin-bottom: 20px;
+}

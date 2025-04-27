@@ -1,0 +1,27 @@
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 16px;
+    color: #5c5c5c;
+    margin-bottom: 8px;
+    display: block;
+}
+
+button.submit-button {
+    background-color: #BECCAD;
+    color: white;
+    font-size: 16px;
+    padding: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+button.submit-button:hover {
+    background-color: #7ea787;
+}
