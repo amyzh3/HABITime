@@ -26,12 +26,7 @@ app.use(express.json());
 
 // google access
 const { google } = require('googleapis');
-const oAuth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  'post message'
-);
-// Save tokens in Firestore (see below)
+
 
 // ex route
 app.get('/', (req, res) => {
@@ -47,12 +42,12 @@ app.listen(PORT, () => {
 
 // HELPERS
 async function saveUserTokens(userId, tokens) {
-  const userRef = firestore.collection('users').doc(userId);
+  const userRef = db.collection('users').doc(userId);
   await userRef.set({ tokens }, { merge: true });
 }
 
 async function loadTokensFromFirestore(userId) {
-  const userRef = firestore.collection('users').doc(userId);
+  const userRef = db.collection('users').doc(userId);
   const doc = await userRef.get();
   return doc.exists ? doc.data().tokens : null;
 }
@@ -78,6 +73,8 @@ async function getCalendarEvents(userId) {
 // add a user to the database: auth (string), age (int), nickname (string)
 // targetConcerns (list of strings), improveAreas (list of strings)
 app.post('/createuser', async (req, res) => {
+  console.log('IN createuser ENDPOINT');
+  console.log(req.body);
   try {
     const { code, nickname, age, concerns, habits } = req.body;
     console.log(code);
@@ -87,7 +84,15 @@ app.post('/createuser', async (req, res) => {
     console.log(habits);
 
     // Exchange authorization code for access + refresh tokens
+    console.log('TRYING TO GET TOKENS');
+    const oAuth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      'postmessage'
+    );
+
     const { tokens } = await oAuth2Client.getToken(code);
+    console.log('OBTAINED TOKENS');
 
     // Create user document first
     const docRef = await db.collection('users').add({

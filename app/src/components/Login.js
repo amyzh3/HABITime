@@ -37,7 +37,8 @@ export default function Login() {
                     console.log('Authorization code:', response.code);
                     localStorage.setItem('googleAuthCode', response.code);
                     setAuthCode(response.code);
-                }
+                },
+                redirect_uri: "http://localhost:3000/signup"
             });
             client.requestCode();
 

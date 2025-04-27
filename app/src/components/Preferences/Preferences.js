@@ -31,6 +31,7 @@ function Preferences({ nickname, age}) {
             habits: formData.habits
         };
         try {
+            console.log("POSTING TO http://localhost:8080/createuser")
             const response = await axios.post('http://localhost:8080/createuser', userData, {
                 headers: {
                     'Content-Type': 'application/json',
