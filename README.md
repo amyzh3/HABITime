@@ -1,6 +1,8 @@
 # HABITime - LA Hacks 2025
 Yoonseo Choi, Andy Kim, Ellie Xing, Amy Zhang
 
+[Demo Video](https://youtu.be/8WiwDtg693s)
+
 ## 💡 Inspiration
 What time is it? **HABITime**! (whoo)
 
